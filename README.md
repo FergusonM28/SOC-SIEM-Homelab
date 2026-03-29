@@ -10,3 +10,5 @@
 ![image alt](https://github.com/FergusonM28/SOC-SIEM-Homelab/blob/dfdc2738c1bdae21c33435b1551969790c75a28d/Sysmon%20screenshot.jpg)
  
 Downloaded Splunk & added the Sysmon app addition first then configured Splunk to ingest Sysmon logs
+![image alt](https://github.com/FergusonM28/SOC-SIEM-Homelab/blob/5b16de108a968ccdf544a59398dcc8d708fc8ca3/Splunk%20screenshot.jpg)
+![image alt]()

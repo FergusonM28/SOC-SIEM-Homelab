@@ -4,6 +4,6 @@
  
  I downloaded VirtualBox along with Kali Linux & Windows ISO files. Also setup NAT connection for both
  
- Installed Sysmon for additional telemetry
+ Installed Sysmon for additional telemetry ![file:///Users/mauriceferguson/Desktop/Screenshot%202026-03-28%20at%205.43.42%E2%80%AFPM.png](image_url)
 
  

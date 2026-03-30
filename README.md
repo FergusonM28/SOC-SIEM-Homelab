@@ -21,4 +21,5 @@ Once I generated a link with the malware I created I went over to the Windows ma
 
 I queried the file name, "Resume.pdf", & 13 related events showed up. Of those 13 events, 7 event codes came up with event code number 1 having the most hits so I further investigated that ![image alt](https://github.com/FergusonM28/SOC-SIEM-Homelab/blob/e1a03107a98909c4ecbe4fb7df858c7bbcfab4a5/Event%20code.jpg)
 
-During the search I found the ParentImage had spawned the process of cmd.exe with a PID of 8308 ![image alt]()
+During the search I found the ParentImage had spawned the process of cmd.exe with a PID of 8308 ![image alt](https://github.com/FergusonM28/SOC-SIEM-Homelab/blob/9ff44957c313bdb56d1d1a45508125dca29d6320/ParentImage%20ID%20.jpg)
+![image alt]()

@@ -15,4 +15,8 @@ Downloaded Splunk & added the Sysmon app addition first then configured Splunk t
 
 On the Kali Linux attacker machine, I ran an NMAP scan on the Windows machine to check for open ports ![image alt](https://github.com/FergusonM28/SOC-SIEM-Homelab/blob/f707fc6bb870a5716138745b3a89788904fc07dd/JPEG%20Nmap.jpg)
 
-I then made a reverse tcp payload using msfvenom against the Windows machine [image alt]()
+I then made a reverse tcp payload using msfvenom against the Windows machine & named it "Resume.pdf" ![image alt](https://github.com/FergusonM28/SOC-SIEM-Homelab/blob/4eb325c778f78594b713044b16fea539c16eeb9e/JPEG%20reverse%20tcp.jpg)
+
+Once I generated a link with the malware I created I went over to the Windows machine & executed it, this is where the investigation begins!
+
+I queried the file name, "Resume.pdf", & 13 related events showed up. Of those 13 events, 7 event codes came up with event code number 1 having the most hits so I further investigated that[image alt]()

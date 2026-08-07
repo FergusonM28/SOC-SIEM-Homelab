@@ -1,4 +1,4 @@
-# SOC SIEM Homelab
+# SOC SIEM Home-Lab
 
 A home lab built to simulate a real-world attack and investigate it the way a SOC analyst would. The environment consists of a Windows 10 victim machine running Splunk with Sysmon for endpoint telemetry, and a Kali Linux attacker machine used to launch attacks against it.
 

@@ -1,6 +1,6 @@
 # SOC SIEM Home-Lab
 
-A home lab built to simulate a real-world attack and investigate it the way a SOC analyst would. The environment consists of a Windows 10 victim machine running Splunk with Sysmon for endpoint telemetry, and a Kali Linux attacker machine used to launch attacks against it.
+A home lab built with a Splunk SIEM (Sysmon telemetry) on a Windows host and a Kali Linux attacker box, used to simulate and investigate a real intrusion end-to-end. Includes a full incident report with MITRE ATT&CK mapping, IOCs, and recommendations.
 
 In this scenario, a reverse TCP payload disguised as a resume is delivered to the Windows machine and executed. The resulting activity is investigated end-to-end in Splunk, from initial alert to root cause.
 

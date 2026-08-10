@@ -71,14 +71,6 @@ Pivoting on the process GUID revealed the full sequence of commands run through 
 - Post-exploitation activity focused on discovery (accounts, groups, network config) — consistent with an attacker performing initial reconnaissance after gaining a foothold.
 - Sysmon's process, parent-process, and command-line logging was essential to reconstructing the full attack chain; default Windows event logging alone would not have provided this level of detail.
 
-## Skills Demonstrated
-
-- Building and configuring a Windows/Linux lab environment in VirtualBox
-- Installing and tuning Sysmon for endpoint telemetry
-- Ingesting and searching logs in Splunk
-- Simulating an attack chain (recon → payload delivery → execution → post-exploitation)
-- Investigating an alert from initial indicator through to root cause using process ancestry and command-line analysis
-- Mapping observed attacker behavior to the MITRE ATT&CK framework
 
 ## Tools Used
 
@@ -89,3 +81,73 @@ Pivoting on the process GUID revealed the full sequence of commands run through 
 - Splunk
 - Metasploit / msfvenom
 - Nmap
+
+## Incident Report
+
+[#incident-report](#incident-report)
+
+A formal incident report was written up for this exercise, following the same structure and rigor used for a real SOC incident (executive summary, timeline, detection & analysis, IOCs, MITRE ATT&CK mapping, impact assessment, containment/eradication/recovery, and recommendations).
+
+| Field | Value |
+|---|---|
+| **Incident ID** | IR-2026-001 |
+| **Analyst** | Maurice Ferguson |
+| **Severity** | High (simulated) |
+| **Status** | Closed — Contained & Documented |
+| **Category** | Malicious Code Execution / Post-Exploitation Discovery |
+
+### Executive Summary
+
+A Windows 10 host in this lab executed a malicious file disguised as `Resume.pdf`, resulting in a reverse shell connection back to an attacker-controlled machine. The activity was identified and investigated using Splunk (SIEM) with Sysmon-enhanced endpoint telemetry. Analysis confirmed the executable spawned a command shell and was used to run several discovery commands consistent with post-exploitation reconnaissance. No lateral movement, data exfiltration, or persistence mechanisms were observed. The incident was fully reconstructed from initial delivery through post-exploitation activity using process ancestry and command-line analysis, and mapped to eight MITRE ATT&CK techniques across five tactics.
+
+### Detection & Analysis
+
+**Initial Search:** The investigation began with a Splunk search for the delivered filename, `Resume.pdf`. This search returned 13 related events spanning 7 distinct Sysmon event codes. Event Code 1 (Process Creation) had the highest number of hits and was selected as the starting point for deeper investigation.
+
+**Process Ancestry:** Drilling into the Event Code 1 results showed that the payload's parent process had spawned `cmd.exe` (PID 8308) — a strong indicator that the malicious file had granted the attacker interactive shell access to the host.
+
+**Command-Line Reconstruction:** Pivoting on the process GUID associated with the spawned shell revealed the full sequence of commands executed by the attacker: `net user`, `net localgroup`, and `ipconfig` — discovery commands used to enumerate local accounts, group membership, and network configuration.
+
+**Analyst Assessment:** No evidence of lateral movement, credential dumping, additional payload staging, or persistence mechanisms was identified in the available telemetry. The observed activity is consistent with the early discovery phase of an intrusion.
+
+### Indicators of Compromise (IOCs)
+
+- **Filename:** `Resume.pdf` (masquerading as a benign document; actual payload was a reverse TCP executable generated with msfvenom)
+- **Spawned process:** `cmd.exe`, PID 8308, launched as a child of the executed payload
+- **Post-exploitation commands:** `net user`, `net localgroup`, `ipconfig`
+- **Behavioral pattern:** Reverse shell (Application Layer Protocol C2) followed immediately by local discovery commands
+
+### MITRE ATT&CK Mapping
+
+| Attack Step | Technique | ATT&CK ID | Tactic |
+|---|---|---|---|
+| Nmap scan against Windows host | Network Service Discovery | T1046 | Discovery |
+| Payload disguised as "Resume.pdf" | Masquerading | T1036 | Defense Evasion |
+| Payload delivery & execution | User Execution: Malicious File | T1204.002 | Execution |
+| Reverse TCP shell established | Application Layer Protocol | T1071.001 | Command and Control |
+| cmd.exe spawned from payload | Command & Scripting Interpreter: Windows Shell | T1059.003 | Execution |
+| `net user` executed | Account Discovery: Local Account | T1087.001 | Discovery |
+| `net localgroup` executed | Permission Groups Discovery: Local Groups | T1069.001 | Discovery |
+| `ipconfig` executed | System Network Configuration Discovery | T1016 | Discovery |
+
+### Impact Assessment
+
+Within the scope of this lab, the attacker achieved interactive shell access to a single host and completed local discovery reconnaissance. Had this occurred in a production environment, the enumerated account and group information could have been used to plan credential-based lateral movement or privilege escalation. Because default Windows Event Logging alone does not capture process ancestry or command-line arguments in sufficient detail, an environment without Sysmon-level telemetry would likely have missed the parent-child process relationship and command reconstruction that made root-cause analysis possible here.
+
+### Containment, Eradication & Recovery
+
+- **Containment:** The lab network is isolated by design (NAT-only VirtualBox network), so no additional network containment was required; in production, the recommended action would be immediate host isolation from the network.
+- **Eradication:** The malicious executable and spawned process were identified and would be removed/terminated; the host would be flagged for a full antivirus/EDR scan and re-imaging if persistence were suspected.
+- **Recovery:** In a live environment, the affected host would be monitored closely post-remediation for reappearance of the same process tree, filename, or C2 behavior before being returned to normal use.
+
+### Recommendations & Lessons Learned
+
+- **Deploy Sysmon (or equivalent EDR telemetry) organization-wide.** Default Windows Event Logging did not provide the process ancestry or command-line visibility needed to reconstruct this attack chain; Sysmon was the deciding factor in identifying root cause.
+- **Alert on masquerading file types.** Consider detections for executables with document-style filenames/extensions (e.g., ".pdf.exe" or icon spoofing) delivered via email or removable media.
+- **Tune detections around discovery commands.** `net user`, `net localgroup`, and `ipconfig` are low-noise individually, but a short burst of all three from a freshly spawned shell is a high-fidelity indicator worth alerting on.
+- **User awareness training.** This scenario relied on social engineering (a disguised "resume" file); reinforcing user caution around unsolicited attachments remains a low-cost, high-value control.
+- **Baseline this attack chain as a detection use case.** The full kill chain documented here (recon → masquerading → execution → C2 → discovery) is a strong candidate for a saved Splunk correlation search or detection rule.
+
+### Conclusion
+
+This investigation demonstrated a complete SOC analyst workflow: identifying a suspicious file execution, pivoting through endpoint telemetry to establish process ancestry, reconstructing attacker command-line activity, and mapping observed behavior to the MITRE ATT&CK framework. The exercise reinforced the value of high-fidelity endpoint telemetry (Sysmon) in reducing investigation time and improving accuracy of root-cause analysis.
